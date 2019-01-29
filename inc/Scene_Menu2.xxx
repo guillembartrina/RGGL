@@ -1,0 +1,77 @@
+#ifndef SCENE__MENU_HPP
+#define SCENE__MENU_HPP
+
+#include <vector>
+#include <list>
+#include <cmath>
+
+#include "SFML/Graphics.hpp"
+
+#include "Scene.hpp"
+
+#include "GraphGenerator.hpp"
+
+#define PI 3.14159265358979323846
+
+struct node
+{
+    sf::Vector2f pos;
+    std::vector<int> con;
+};
+
+class Scene_Menu : public Scene
+{
+public:
+
+    Scene_Menu(SceneHandler* sceneHandler, Resources* resources, sf::RenderWindow* window);
+    ~Scene_Menu();
+
+    void init();
+
+    void handleEvents(const sf::Event& event);
+
+    void update(const sf::Time deltatime);
+
+    void draw(sf::RenderWindow& window) const;
+
+    void pause();
+
+    void resume();
+
+private:
+
+    sf::RenderWindow* window;
+
+    sf::Text menuText;
+    sf::RectangleShape menuRect;
+    sf::Text genText;
+
+    sf::Text typeText;
+    sf::Text typeValue;
+    int typeNum;
+    const char typeStrings[3] = { 'T', 'G'};
+
+    sf::Text valText;
+    sf::Text valValue;
+    int valNum;
+    bool onWrite;
+
+    sf::Text distText;
+    sf::Text distValue;
+    int distNum;
+    const char distStrings[4] = { 'H', 'R', 'r', 'Q'};
+
+    std::vector<node> nodes;
+    node* currNode;
+
+    sf::Vector2f view;
+    float zoom;
+
+    float distance(sf::Vector2f p1, sf::Vector2f p2);
+    void generate(int n);
+    void distribute(int mode);
+    void roundDistribute(sf::Vector2f c, vector<bool>& v, float aI, float aF, int o, int n);
+
+};
+
+#endif
