@@ -97,8 +97,7 @@ private:
     b2Body* walls[4];
 
     static float distance(sf::Vector2f p1, sf::Vector2f p2);
-    sf::Vector2f force1(int node);
-    static sf::Vector2f force2(std::vector<node>& nodes, float k, int node);
+    static sf::Vector2f force(std::vector<node>& nodes, float k, int node);
 
     void generate(int nodes);
     void distribute(Distribution mode);

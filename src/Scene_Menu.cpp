@@ -286,51 +286,7 @@ float Scene_Menu::distance(sf::Vector2f p1, sf::Vector2f p2)
     return d;
 }
 
-sf::Vector2f Scene_Menu::force1(int node)
-{
-    int size = nodes.size();
-    std::vector<bool> checked(size, false);
-
-    sf::Vector2f position = nodes[node].position;
-    sf::Vector2f force = sf::Vector2f(0, 0);
-
-    float k = sqrt(window->getSize().x * window->getSize().y / size);
-
-    for(unsigned int i = 0; i < nodes[node].adjancents.size(); i++)
-    {
-        sf::Vector2f destination = nodes[nodes[node].adjancents[i]].position;
-
-        sf::Vector2f direction = destination - position; //current -> adjacent (force)
-        float angle = atan2f(direction.y, direction.x);
-
-        float tmpForce = pow(distance(position, destination), 2) / k;
-
-        force += sf::Vector2f(tmpForce * cosf(angle), tmpForce * sinf(angle));
-
-        checked[nodes[node].adjancents[i]] = true;
-    }
-
-    for(unsigned int i = 0; i < size; i++)
-    {
-        if(i != node and not checked[i])
-        {
-            sf::Vector2f destination = nodes[i].position;
-
-            sf::Vector2f direction = destination - position; //current <- adjacent (force)
-            float angle = atan2f(direction.y, direction.x);
-
-            float tmpForce = -1 * (pow(k, 2) / distance(position, destination));
-
-            force += sf::Vector2f(tmpForce * cosf(angle), tmpForce * sinf(angle));
-
-            checked[i] = true;
-        }
-    }
-
-    return force;
-}
-
-sf::Vector2f Scene_Menu::force2(std::vector<node>& nodes, float k, int node)
+sf::Vector2f Scene_Menu::force(std::vector<node>& nodes, float k, int node)
 {
     int size = nodes.size();
 
@@ -351,7 +307,6 @@ sf::Vector2f Scene_Menu::force2(std::vector<node>& nodes, float k, int node)
     {
         sf::Vector2f direction = nodes[nodes[node].adjancents[i]].position - position;
         float modulo = tob2Vec2(direction).Length();
-
         force += (direction / modulo) * float(pow(modulo, 2) / k);
     }
 
@@ -394,8 +349,22 @@ void Scene_Menu::distribute(Distribution mode)
             verticalD(nodes);
             break;
         case Distribution::PHYSIC:
+        {
             physicD(nodes, world, area);
             physic = true;
+            int max = 0;
+            for(unsigned int i = 0; i < nodes.size(); ++i)
+            {
+                if(nodes[i].adjancents.size() > nodes[max].adjancents.size()) max = i;
+            }
+
+            sf::Vector2f move = sf::Vector2f(window->getSize().x / 2, window->getSize().y / 2) - nodes[max].position;
+
+            for(unsigned int i = 0; i < nodes.size(); ++i)
+            {
+                nodes[i].position += move;
+            }
+        }
             break;
         case Distribution::ROUND:
         case Distribution::ROUNDCENTERED:
@@ -477,18 +446,18 @@ void Scene_Menu::physicD(std::vector<node>& nodes, b2World* world, float area)
     }
 
     float k = sqrt(area / nodes.size());
-    float t = 24.f;
+    float t = 10 * sqrt(nodes.size());
 
-    while(t > 0.001f)
+    while(t > 1.f)
     {
-        for(unsigned int i = 1; i < nodes.size(); i++) //BEGIN AT ONE
+        for(unsigned int i = 0; i < nodes.size(); i++)
         {
-            sf::Vector2f force = force2(nodes, k, i);
-            nodes[i].position = nodes[i].position + ((force / tob2Vec2(force).Length()) * min(tob2Vec2(force).Length(), t));
+            sf::Vector2f f = force(nodes, k, i);
+            nodes[i].position = nodes[i].position + ((f / tob2Vec2(f).Length()) * min(tob2Vec2(f).Length(), t));
             //nodes[i].position.x = min(800 / 2, max(-1 * 800 / 2, int(nodes[i].position.x)));
             //nodes[i].position.y = min(800 / 2, max(-1 * 800 / 2, int(nodes[i].position.y)));
         }
-        t = max(t - 0.1f, 0.001f);
+        t = max(t * 0.95f, 1.f);
     }
 }
 

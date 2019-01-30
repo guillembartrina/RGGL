@@ -1,0 +1,44 @@
+//Springs method
+sf::Vector2f Scene_Menu::force(int node)
+{
+    int size = nodes.size();
+    std::vector<bool> checked(size, false);
+
+    sf::Vector2f position = nodes[node].position;
+    sf::Vector2f force = sf::Vector2f(0, 0);
+
+    float k = sqrt(window->getSize().x * window->getSize().y / size);
+
+    for(unsigned int i = 0; i < nodes[node].adjancents.size(); i++)
+    {
+        sf::Vector2f destination = nodes[nodes[node].adjancents[i]].position;
+
+        sf::Vector2f direction = destination - position; //current -> adjacent (force)
+        float angle = atan2f(direction.y, direction.x);
+
+        float tmpForce = pow(distance(position, destination), 2) / k;
+
+        force += sf::Vector2f(tmpForce * cosf(angle), tmpForce * sinf(angle));
+
+        checked[nodes[node].adjancents[i]] = true;
+    }
+
+    for(unsigned int i = 0; i < size; i++)
+    {
+        if(i != node and not checked[i])
+        {
+            sf::Vector2f destination = nodes[i].position;
+
+            sf::Vector2f direction = destination - position; //current <- adjacent (force)
+            float angle = atan2f(direction.y, direction.x);
+
+            float tmpForce = -1 * (pow(k, 2) / distance(position, destination));
+
+            force += sf::Vector2f(tmpForce * cosf(angle), tmpForce * sinf(angle));
+
+            checked[i] = true;
+        }
+    }
+
+    return force;
+}
