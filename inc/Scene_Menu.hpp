@@ -10,6 +10,7 @@
 
 #include "Scene.hpp"
 
+#include "RandomGenerator.hpp"
 #include "GraphGenerator.hpp"
 #include "Box2DUtils.hpp"
 
@@ -88,23 +89,23 @@ private:
     float zoom;
 
     const b2Vec2 gravity = b2Vec2(0.f, 0.f);
-    const float c1 = 1.f;
-    const float c2 = 1.f;
-    const float c3 = 1.f;
-    const float c4 = 0.1f;
+    const float area = window->getSize().x * window->getSize().y;
 
     bool physic;
     b2World* world;
 
+    b2Body* walls[4];
+
     static float distance(sf::Vector2f p1, sf::Vector2f p2);
-    sf::Vector2f calculeForce(std::vector<node>& nodes, int node);
+    sf::Vector2f force1(int node);
+    static sf::Vector2f force2(std::vector<node>& nodes, float k, int node);
 
     void generate(int nodes);
     void distribute(Distribution mode);
 
     static void gridD(std::vector<node>& nodes);
     static void verticalD(std::vector<node>& nodes);
-    static void physicD(std::vector<node>& nodes, b2World* world);
+    static void physicD(std::vector<node>& nodes, b2World* world, float area);
     static void roundD(std::vector<node>& nodes, Distribution mode);
     static void roundDrec(std::vector<node>& nodes, sf::Vector2f c, vector<bool>& v, float aI, float aF, int o, int n);
 };

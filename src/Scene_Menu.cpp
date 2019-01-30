@@ -74,6 +74,17 @@ void Scene_Menu::init()
 
     physic = false;
     world = new b2World(gravity);
+
+    b2PolygonShape shape = createRectangle(b2Vec2(window->getSize().x - 40, 20));
+
+    walls[0] = createBody(*world, b2Vec2(20, 0), b2BodyType::b2_staticBody, &shape, 10.f, 0.1f, 0.f);
+    walls[1] = createBody(*world, b2Vec2(20, window->getSize().y - 20), b2BodyType::b2_staticBody, &shape, 10.f, 0.1f, 0.f);
+
+    shape = createRectangle(b2Vec2(20, window->getSize().y - 40));
+
+    walls[2] = createBody(*world, b2Vec2(0, 20), b2BodyType::b2_staticBody, &shape, 10.f, 0.1f, 0.f);
+    walls[3] = createBody(*world, b2Vec2( window->getSize().x - 20, 20), b2BodyType::b2_staticBody, &shape, 10.f, 0.1f, 0.f);
+
 }
 
 void Scene_Menu::handleEvents(const sf::Event& event)
@@ -162,35 +173,32 @@ void Scene_Menu::handleEvents(const sf::Event& event)
             }
             else
             {
-                if(not physic)
+                switch(event.key.code)
                 {
-                    switch(event.key.code)
+                    case sf::Keyboard::Up:
                     {
-                        case sf::Keyboard::Up:
-                        {
-                            if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && zoom < 5) zoom += 0.1f;
-                            else view = view + sf::Vector2f(0.f, 20.f);
-                        }
-                            break;
-                        case sf::Keyboard::Down:
-                        {
-                            if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && zoom > 0.1) zoom -= 0.1f;
-                            else view = view + sf::Vector2f(0.f, -20.f);
-                        }
-                            break;
-                        case sf::Keyboard::Left:
-                        {
-                            view = view + sf::Vector2f(20.f, 0.f);
-                        }
-                            break;
-                        case sf::Keyboard::Right:
-                        {
-                            view = view + sf::Vector2f(-20.f, 0.f);
-                        }
-                            break;
-                        default:
-                            break;
+                        if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && zoom < 5) zoom += 0.1f;
+                        else view = view + sf::Vector2f(0.f, 20.f);
                     }
+                        break;
+                    case sf::Keyboard::Down:
+                    {
+                        if(sf::Keyboard::isKeyPressed(sf::Keyboard::LShift) && zoom > 0.1) zoom -= 0.1f;
+                        else view = view + sf::Vector2f(0.f, -20.f);
+                    }
+                        break;
+                    case sf::Keyboard::Left:
+                    {
+                        view = view + sf::Vector2f(20.f, 0.f);
+                    }
+                        break;
+                    case sf::Keyboard::Right:
+                    {
+                        view = view + sf::Vector2f(-20.f, 0.f);
+                    }
+                        break;
+                    default:
+                        break;
                 }
             }
         }
@@ -202,22 +210,6 @@ void Scene_Menu::handleEvents(const sf::Event& event)
 
 void Scene_Menu::update(const sf::Time deltatime)
 {
-    if(physic)
-    {
-        for(unsigned int i = 0; i < nodes.size(); i++)
-        {
-            sf::Vector2f force = calculeForce(nodes, i);
-            nodes[i].body->ApplyForceToCenter(metrize(tob2Vec2(force)), false);
-        }
-
-        world->Step(deltatime.asSeconds(), 4, 4);
-
-        for(unsigned int i = 0; i < nodes.size(); i++)
-        {
-            nodes[i].position = toVector2f(pixelize(nodes[i].body->GetPosition()));
-        }
-    }
-
     if(currentNode != nullptr)
     {
         currentNode->position = (sf::Vector2f(sf::Mouse::getPosition(*window)) /zoom) - view;
@@ -294,7 +286,7 @@ float Scene_Menu::distance(sf::Vector2f p1, sf::Vector2f p2)
     return d;
 }
 
-sf::Vector2f Scene_Menu::calculeForce(std::vector<node>& nodes, int node)
+sf::Vector2f Scene_Menu::force1(int node)
 {
     int size = nodes.size();
     std::vector<bool> checked(size, false);
@@ -302,7 +294,7 @@ sf::Vector2f Scene_Menu::calculeForce(std::vector<node>& nodes, int node)
     sf::Vector2f position = nodes[node].position;
     sf::Vector2f force = sf::Vector2f(0, 0);
 
-    float k = sqrt(800*800/size);
+    float k = sqrt(window->getSize().x * window->getSize().y / size);
 
     for(unsigned int i = 0; i < nodes[node].adjancents.size(); i++)
     {
@@ -333,6 +325,34 @@ sf::Vector2f Scene_Menu::calculeForce(std::vector<node>& nodes, int node)
 
             checked[i] = true;
         }
+    }
+
+    return force;
+}
+
+sf::Vector2f Scene_Menu::force2(std::vector<node>& nodes, float k, int node)
+{
+    int size = nodes.size();
+
+    sf::Vector2f force = sf::Vector2f(0, 0);
+    sf::Vector2f position = nodes[node].position;
+
+    for(int i = 0; i < size; i++)
+    {
+        if(i != node)
+        {
+            sf::Vector2f direction = position - nodes[i].position;
+            float modulo = tob2Vec2(direction).Length();
+            force += (direction / modulo) * float(pow(k, 2) / modulo);
+        }
+    }
+
+    for(unsigned int i = 0; i < nodes[node].adjancents.size(); i++)
+    {
+        sf::Vector2f direction = nodes[nodes[node].adjancents[i]].position - position;
+        float modulo = tob2Vec2(direction).Length();
+
+        force += (direction / modulo) * float(pow(modulo, 2) / k);
     }
 
     return force;
@@ -374,7 +394,7 @@ void Scene_Menu::distribute(Distribution mode)
             verticalD(nodes);
             break;
         case Distribution::PHYSIC:
-            physicD(nodes, world);
+            physicD(nodes, world, area);
             physic = true;
             break;
         case Distribution::ROUND:
@@ -443,15 +463,32 @@ void Scene_Menu::verticalD(std::vector<node>& nodes)
     }
 }
 
-void Scene_Menu::physicD(std::vector<node>& nodes, b2World* world)
+void Scene_Menu::physicD(std::vector<node>& nodes, b2World* world, float area)
 {
+    RandomGenerator randEngine;
+
     for(unsigned int i = 0; i < nodes.size(); ++i)
     {
-        nodes[i].position = sf::Vector2f(100 + 100*(i%6), 100 + 100*(i/6));
+        nodes[i].position = sf::Vector2f(randEngine.getRandInt(20, 780), randEngine.getRandInt(20, 780));
 
         b2CircleShape circle = createCircle(20.f);
 
         nodes[i].body = createBody(*world, tob2Vec2(nodes[i].position), b2BodyType::b2_dynamicBody, &circle, 1.f, 0.1f, 0.1f);
+    }
+
+    float k = sqrt(area / nodes.size());
+    float t = 24.f;
+
+    while(t > 0.001f)
+    {
+        for(unsigned int i = 1; i < nodes.size(); i++) //BEGIN AT ONE
+        {
+            sf::Vector2f force = force2(nodes, k, i);
+            nodes[i].position = nodes[i].position + ((force / tob2Vec2(force).Length()) * min(tob2Vec2(force).Length(), t));
+            //nodes[i].position.x = min(800 / 2, max(-1 * 800 / 2, int(nodes[i].position.x)));
+            //nodes[i].position.y = min(800 / 2, max(-1 * 800 / 2, int(nodes[i].position.y)));
+        }
+        t = max(t - 0.1f, 0.001f);
     }
 }
 

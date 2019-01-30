@@ -68,7 +68,7 @@ static void move(b2Body* from, sf::Transformable& to)
 static b2PolygonShape createRectangle(b2Vec2 size)
 {
     b2PolygonShape rectangle;
-    rectangle.SetAsBox(metrize(size.x/2), metrize(size.y/2));
+    rectangle.SetAsBox(metrize(size.x), metrize(size.y));
 
     return rectangle;
 }
