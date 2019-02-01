@@ -9,6 +9,9 @@
 #include "SceneHandler.hpp"
 #include "Resources.hpp"
 
+#include "imgui.h"
+#include "imguiSFML.h"
+
 class Game : public sf::NonCopyable
 {
 public:

@@ -19,7 +19,9 @@ void Game::init()
 {
   _window.create(sf::VideoMode(W, H), title);
   _window.setFramerateLimit(60);
-  //_window.setKeyRepeatEnabled(false);
+  _window.setKeyRepeatEnabled(false);
+
+  ImGui::SFML::Init(_window);
 
   _sceneHandler.addScene(std::unique_ptr<Scene>(new Scene_Menu(&_sceneHandler, &_resources, &_window)));
 
@@ -37,7 +39,11 @@ void Game::loop()
     draw();
 
     _sceneHandler.applySceneRequests();
-    if(_sceneHandler.exitRequest()) _window.close();
+    if(_sceneHandler.exitRequest())
+    {
+      ImGui::SFML::Shutdown();
+      _window.close();
+    }
   }
 }
 
@@ -46,12 +52,16 @@ void Game::update()
   sf::Time deltatime;
   deltatime = _clock.restart();
 
+  ImGui::SFML::Update(_window, deltatime);
+
   _sceneHandler.activeScene().update(deltatime);
 }
 
 void Game::draw()
 {
   _window.clear(sf::Color::Black);
+
+  ImGui::SFML::Render(_window);
 
   _sceneHandler.activeScene().draw(_window);
 
@@ -72,6 +82,8 @@ void Game::handleEvents()
       default:
         break;
     }
+
+    ImGui::SFML::ProcessEvent(event);
 
     _sceneHandler.activeScene().handleEvents(event);
   }

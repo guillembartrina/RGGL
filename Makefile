@@ -19,19 +19,29 @@ SFML_FLAGS = -Lsfml/lib -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 D_BOX2D_INC = box2d/include
 BOX2D_FLAGS = -Lbox2d/lib -lBox2D
 
+D_IMGUI = imgui
+F_IMGUI = $(wildcard $(D_IMGUI)/*.cpp)
+O_IMGUI = $(patsubst $(D_IMGUI)/%.cpp,$(D_OBJ)/%.o,$(F_IMGUI))
+
+GL_FLAGS = -lopengl32 -lglu32
+
+
 #COMMANDS
-game.exe: $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ)
-	g++ -o $(D_BIN)/$@ $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(SFML_FLAGS) $(BOX2D_FLAGS)
+game.exe: $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(O_IMGUI)
+	g++ -o $(D_BIN)/$@ $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(O_IMGUI) $(SFML_FLAGS) $(BOX2D_FLAGS) $(GL_FLAGS)
 
 $(D_OBJ)/main.o: main.cpp
-	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS)
+	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_IMGUI) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS) $(GL_FLAGS)
 
 $(D_OBJ)/%.o: $(D_SRC_M)/%.cpp $(D_INC_M)/%.hpp
-	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS)
+	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_IMGUI) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS) $(GL_FLAGS)
 
 $(D_OBJ)/%.o: $(D_SRC)/%.cpp $(D_INC)/%.hpp
-	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS)
+	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_IMGUI) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS) $(GL_FLAGS)
 
-clear:
+$(D_OBJ)/%.o: $(D_IMGUI)/%.cpp
+	g++ -c $< -o $@ -I$(D_INC_M) -I$(D_INC) -I$(D_IMGUI) -I$(D_SFML_INC) -I$(D_BOX2D_INC) $(CXX_FLAGS) $(GL_FLAGS)
+
+clean:
 	rm obj/*.o
 	rm bin/*.exe

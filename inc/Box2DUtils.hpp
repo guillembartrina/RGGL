@@ -68,17 +68,9 @@ static void move(b2Body* from, sf::Transformable& to)
 static b2PolygonShape createRectangle(b2Vec2 size)
 {
     b2PolygonShape rectangle;
-    rectangle.SetAsBox(metrize(size.x), metrize(size.y));
+    rectangle.SetAsBox(metrize(size.x/2), metrize(size.y/2));
 
     return rectangle;
-}
-
-static b2CircleShape createCircle(float radius)
-{
-    b2CircleShape circle;
-    circle.m_radius = metrize(radius);
-
-    return circle;
 }
 
 static b2Body* createBody(b2World& world, b2Vec2 position, b2BodyType type, b2Shape* shape, float density, float friction, float restitution)
