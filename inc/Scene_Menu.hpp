@@ -7,6 +7,7 @@
 #include "Box2DUtils.hpp"
 
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "imguiSFML.h"
 
 #include "SFML/Graphics.hpp"
@@ -69,6 +70,7 @@ private:
     Type type;
     int tmpType;
     int numNodes;
+    float density;
     Distribution distribution;
     int tmpDistribution;
 
@@ -80,7 +82,7 @@ private:
 
     static float distance(sf::Vector2f p1, sf::Vector2f p2);
 
-    void generate(Type type, int nodes);
+    void generate(Type type, int nodes, float density);
     void distribute(Distribution mode);
 
     static sf::Vector2f force(std::vector<node>& nodes, float k, int node);

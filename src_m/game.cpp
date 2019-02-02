@@ -61,9 +61,9 @@ void Game::draw()
 {
   _window.clear(sf::Color::Black);
 
-  ImGui::SFML::Render(_window);
-
   _sceneHandler.activeScene().draw(_window);
+
+  ImGui::SFML::Render(_window);
 
   _window.display();
 }

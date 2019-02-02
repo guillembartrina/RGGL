@@ -13,6 +13,7 @@ void Scene_Menu::init()
     type = Type::GRAPH;
     tmpType = 0;
     numNodes = 0;
+    density = 0.5f;
     distribution = Distribution::GRID;
     tmpDistribution = 0;
     currentNode = nullptr;
@@ -97,7 +98,7 @@ void Scene_Menu::update(const sf::Time deltatime)
 {
     const char* distributions[] = {"grid", "vertical", "physic", "round", "roundcentered"};
 
-    ImGui::SetNextWindowSize(ImVec2(140, 200));
+    ImGui::SetNextWindowSize(ImVec2(140, 180));
     ImGui::SetNextWindowPos(ImVec2(window->getSize().x - 145, 5));
     ImGui::Begin("MENU", NULL, ImGuiWindowFlags_NoResize);
     ImGui::RadioButton("graph", &tmpType, 0);
@@ -107,6 +108,19 @@ void Scene_Menu::update(const sf::Time deltatime)
     ImGui::PushItemWidth(45.f);
     ImGui::InputScalar(" nodes", ImGuiDataType_U32, &numNodes);
     ImGui::Separator();
+    if(Type(tmpType) == Type::TREE)
+    {
+        ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+        ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+    }
+    ImGui::PushItemWidth(80.f);
+    ImGui::SliderFloat(" dens.", &density, 0.f, 1.f);
+    if(Type(tmpType) == Type::TREE)
+    {
+        ImGui::PopItemFlag();
+        ImGui::PopStyleVar();
+    }
+    ImGui::Separator();
     ImGui::PushItemWidth(80.f);
     ImGui::Combo(" dist.", &tmpDistribution, distributions, IM_ARRAYSIZE(distributions));
     ImGui::Separator();
@@ -115,8 +129,11 @@ void Scene_Menu::update(const sf::Time deltatime)
         type = Type(tmpType);
         distribution = Distribution(tmpDistribution);
 
-        generate(type, numNodes);
-        distribute(distribution);
+        if(numNodes > 0)
+        {
+            generate(type, numNodes, density);
+            distribute(distribution);
+        }
     }
     ImGui::End();
 
@@ -181,14 +198,14 @@ float Scene_Menu::distance(sf::Vector2f p1, sf::Vector2f p2)
     return d;
 }
 
-void Scene_Menu::generate(Type type, int n)
+void Scene_Menu::generate(Type type, int n, float density)
 {
     currentNode = nullptr;
     nodes = std::vector<node>(n);
 
     Graph graph;
 
-    if(type == Type::GRAPH) generateRandomUndirectedGraph(n, 0.5, graph);
+    if(type == Type::GRAPH) generateRandomUndirectedGraph(n, density, graph);
     else if(type == Type::TREE) generateRandomUndirectedTree(n, graph);
 
     for(unsigned int i = 0; i < graph.size(); ++i)
