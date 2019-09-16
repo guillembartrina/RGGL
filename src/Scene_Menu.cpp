@@ -20,6 +20,8 @@ void Scene_Menu::init()
 
     view = sf::Vector2f(0, 0);
     zoom = 1.f;
+
+    dragging = false;
 }
 
 void Scene_Menu::handleEvents(const sf::Event& event)
@@ -59,20 +61,30 @@ void Scene_Menu::handleEvents(const sf::Event& event)
             break;
         case sf::Event::MouseButtonPressed:
         {
-            switch(event.key.code)
+            if(not ImGui::IsMouseHoveringAnyWindow())
             {
-                case sf::Mouse::Left:
+                switch(event.key.code)
                 {
-                    for(unsigned int i = 0; i < nodes.size(); ++i)
+                    case sf::Mouse::Right:
                     {
-                        if(distance(sf::Vector2f(sf::Mouse::getPosition(*window)), (nodes[i].position + view) * zoom) <= 20.f * zoom)
+                        for(unsigned int i = 0; i < nodes.size(); ++i)
                         {
-                            currentNode = &nodes[i];
+                            if(distance(sf::Vector2f(sf::Mouse::getPosition(*window)), (nodes[i].position + view) * zoom) <= 20.f * zoom)
+                            {
+                                currentNode = &nodes[i];
+                            }
                         }
                     }
+                        break;
+                    case sf::Mouse::Left:
+                    {
+                        dragging = true;
+                        prepos = sf::Vector2i(event.mouseButton.x, event.mouseButton.y);
+                    }
+                        break;
+                    default:
+                        break;
                 }
-                default:
-                    break;
             }
         }
             break;
@@ -80,13 +92,28 @@ void Scene_Menu::handleEvents(const sf::Event& event)
         {
             switch(event.key.code)
             {
-                case sf::Mouse::Left:
+                case sf::Mouse::Right:
                 {
                     currentNode = nullptr;
                 }
+                    break;
+                case sf::Mouse::Left:
+                {
+                    dragging = false;
+                }
+                    break;
                 default:
                     break;
             }
+        }
+            break;
+        case sf::Event::MouseWheelScrolled:
+        {
+            sf::Vector2f prevpos = (sf::Vector2f(sf::Mouse::getPosition(*window)) / zoom) - view;
+            zoom *= (event.mouseWheelScroll.delta >= 0.f ? 1.1f : 0.91f);            
+            sf::Vector2f nowpos = (sf::Vector2f(sf::Mouse::getPosition(*window)) / zoom) - view;
+
+            view += (sf::Vector2f(nowpos - prevpos));
         }
             break;
         default:
@@ -139,7 +166,14 @@ void Scene_Menu::update(const sf::Time deltatime)
 
     if(currentNode != nullptr)
     {
-        currentNode->position = (sf::Vector2f(sf::Mouse::getPosition(*window)) /zoom) - view;
+        currentNode->position = (sf::Vector2f(sf::Mouse::getPosition(*window)) / zoom) - view;
+    }
+
+    if(dragging)
+    {
+        sf::Vector2i currpos = sf::Mouse::getPosition(*window);
+        view += (sf::Vector2f(currpos - prepos) / zoom);
+        prepos = currpos;
     }
 }
 
@@ -150,12 +184,12 @@ void Scene_Menu::draw(sf::RenderWindow& window) const
     sf::Vertex line[2];
 
     key.setFont(_resources->Font("font"));
-    key.setCharacterSize(18.f * zoom);
+    key.setCharacterSize(18.f);
     key.setFillColor(sf::Color::White);
     key.setString("-");
 
-    node.setRadius(20.f * zoom);
-    node.setOrigin(20.f * zoom, 20.f * zoom);
+    node.setRadius(20.f);
+    node.setOrigin(20.f, 20.f);
     node.setFillColor(sf::Color::Red);
 
     line[0] = sf::Vertex(sf::Vector2f(0, 0));
@@ -175,7 +209,7 @@ void Scene_Menu::draw(sf::RenderWindow& window) const
     for(unsigned int i = 0; i < nodes.size(); ++i)
     {
         key.setString(std::to_string(i));
-        key.setPosition((nodes[i].position - sf::Vector2f(10.f, 10.f) + view) * zoom);
+        key.setPosition(((nodes[i].position + view) * zoom) - sf::Vector2f(10.f, 10.f));
 
         node.setPosition((nodes[i].position + view) * zoom);
 
@@ -194,6 +228,13 @@ float Scene_Menu::distance(sf::Vector2f p1, sf::Vector2f p2)
     float dY = p1.y - p2.y;
 
     float d = sqrt(dX*dX + dY*dY);
+
+    return d;
+}
+
+float Scene_Menu::lenght(sf::Vector2f v)
+{
+    float d = sqrt(v.x*v.x + v.y*v.y);
 
     return d;
 }
@@ -271,7 +312,7 @@ sf::Vector2f Scene_Menu::force(std::vector<node>& nodes, float k, int node)
         if(i != node)
         {
             sf::Vector2f direction = position - nodes[i].position;
-            float modulo = tob2Vec2(direction).Length();
+            float modulo = lenght(direction);
             force += (direction / modulo) * float(pow(k, 2) / modulo);
         }
     }
@@ -279,7 +320,7 @@ sf::Vector2f Scene_Menu::force(std::vector<node>& nodes, float k, int node)
     for(unsigned int i = 0; i < nodes[node].adjancents.size(); i++)
     {
         sf::Vector2f direction = nodes[nodes[node].adjancents[i]].position - position;
-        float modulo = tob2Vec2(direction).Length();
+        float modulo = lenght(direction);
         force += (direction / modulo) * float(pow(modulo, 2) / k);
     }
 
@@ -361,7 +402,7 @@ void Scene_Menu::physicD(std::vector<node>& nodes, float area)
         for(unsigned int i = 0; i < size; i++)
         {
             sf::Vector2f f = force(nodes, k, i);
-            float modulus = tob2Vec2(f).Length();
+            float modulus = lenght(f);
             nodes[i].position = nodes[i].position + ((f / modulus) * min(modulus, t));
         }
         t = max(t * 0.95f, 1.f);

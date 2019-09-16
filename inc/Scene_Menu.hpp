@@ -3,9 +3,6 @@
 
 #include "Scene.hpp"
 
-#include "Box2D/Box2D.h"
-#include "Box2DUtils.hpp"
-
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imguiSFML.h"
@@ -80,7 +77,11 @@ private:
     sf::Vector2f view;
     float zoom;
 
+    bool dragging;
+    sf::Vector2i prepos;
+
     static float distance(sf::Vector2f p1, sf::Vector2f p2);
+    static float lenght(sf::Vector2f v);
 
     void generate(Type type, int nodes, float density);
     void distribute(Distribution mode);
