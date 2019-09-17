@@ -21,8 +21,10 @@
 struct node
 {
     sf::Vector2f position;
-    std::vector<int> adjancents;
+    std::vector<unsigned int> adjancents;
 };
+
+typedef std::vector<node> GraphLayout;
 
 enum Type
 {
@@ -71,7 +73,7 @@ private:
     Distribution distribution;
     int tmpDistribution;
 
-    std::vector<node> nodes;
+    GraphLayout nodes;
     node* currentNode;
 
     sf::Vector2f view;
@@ -86,14 +88,14 @@ private:
     void generate(Type type, int nodes, float density);
     void distribute(Distribution mode);
 
-    static sf::Vector2f force(std::vector<node>& nodes, float k, int node);
+    static sf::Vector2f force(GraphLayout& nodes, float k, int node);
 
-    static void gridD(std::vector<node>& nodes);
-    static void verticalD(std::vector<node>& nodes);
-    static void physicD(std::vector<node>& nodes, float area);
-    static void roundD(std::vector<node>& nodes);
-    static void roundDrec(std::vector<node>& nodes, sf::Vector2f c, vector<bool>& v, float aI, float aF, int o, int n);
-    static void roundcenteredD(std::vector<node>& nodes);
+    static void gridD(GraphLayout& nodes);
+    static void verticalD(GraphLayout& nodes);
+    static void physicD(GraphLayout& nodes, float area);
+    static void roundD(GraphLayout& nodes);
+    static void roundDrec(GraphLayout& nodes, sf::Vector2f c, std::vector<bool>& v, float aI, float aF, int o, int n);
+    static void roundcenteredD(GraphLayout& nodes);
 
 };
 

@@ -109,11 +109,12 @@ void Scene_Menu::handleEvents(const sf::Event& event)
             break;
         case sf::Event::MouseWheelScrolled:
         {
-            sf::Vector2f prevpos = (sf::Vector2f(sf::Mouse::getPosition(*window)) / zoom) - view;
-            zoom *= (event.mouseWheelScroll.delta >= 0.f ? 1.1f : 0.91f);            
-            sf::Vector2f nowpos = (sf::Vector2f(sf::Mouse::getPosition(*window)) / zoom) - view;
+            sf::Vector2f prevPos = sf::Vector2f(sf::Mouse::getPosition(*window));
 
-            view += (sf::Vector2f(nowpos - prevpos));
+            float factor = (event.mouseWheelScroll.delta >= 0.f ? 1.1f : 0.91f);
+            zoom *= factor;
+
+            view += (sf::Vector2f(prevPos - (prevPos * factor)) / zoom);
         }
             break;
         default:
@@ -184,7 +185,7 @@ void Scene_Menu::draw(sf::RenderWindow& window) const
     sf::Vertex line[2];
 
     key.setFont(_resources->Font("font"));
-    key.setCharacterSize(18.f);
+    key.setCharacterSize(28.f);
     key.setFillColor(sf::Color::White);
     key.setString("-");
 
@@ -209,7 +210,7 @@ void Scene_Menu::draw(sf::RenderWindow& window) const
     for(unsigned int i = 0; i < nodes.size(); ++i)
     {
         key.setString(std::to_string(i));
-        key.setPosition(((nodes[i].position + view) * zoom) - sf::Vector2f(10.f, 10.f));
+        key.setPosition(((nodes[i].position + view) * zoom) - sf::Vector2f(12.f, 18.f));
 
         node.setPosition((nodes[i].position + view) * zoom);
 
@@ -242,19 +243,19 @@ float Scene_Menu::lenght(sf::Vector2f v)
 void Scene_Menu::generate(Type type, int n, float density)
 {
     currentNode = nullptr;
-    nodes = std::vector<node>(n);
+    nodes = GraphLayout(n);
 
-    Graph graph;
+    Graph_AL graph;
 
     if(type == Type::GRAPH) generateRandomUndirectedGraph(n, density, graph);
     else if(type == Type::TREE) generateRandomUndirectedTree(n, graph);
 
     for(unsigned int i = 0; i < graph.size(); ++i)
     {
-        nodes[i].adjancents = std::vector<int>(graph[i].size());
+        nodes[i].adjancents = std::vector<unsigned int>(graph[i].size());
 
         int j = 0;
-        std::list<int>::const_iterator it = graph[i].begin();
+        std::list<unsigned int>::const_iterator it = graph[i].begin();
         while(it != graph[i].end())
         {
             nodes[i].adjancents[j] = *it;
@@ -300,7 +301,7 @@ void Scene_Menu::distribute(Distribution mode)
     }
 }
 
-sf::Vector2f Scene_Menu::force(std::vector<node>& nodes, float k, int node)
+sf::Vector2f Scene_Menu::force(GraphLayout& nodes, float k, int node)
 {
     int size = nodes.size();
 
@@ -327,7 +328,7 @@ sf::Vector2f Scene_Menu::force(std::vector<node>& nodes, float k, int node)
     return force;
 }
 
-void Scene_Menu::gridD(std::vector<node>& nodes)
+void Scene_Menu::gridD(GraphLayout& nodes)
 {
     for(unsigned int i = 0; i < nodes.size(); ++i)
     {
@@ -335,19 +336,19 @@ void Scene_Menu::gridD(std::vector<node>& nodes)
     }
 }
 
-void Scene_Menu::verticalD(std::vector<node>& nodes)
+void Scene_Menu::verticalD(GraphLayout& nodes)
 {
-    map<int, list<int>> levels;
-    vector<bool> vis(nodes.size(), false);
+    std::map<int, std::list<unsigned int>> levels;
+    std::vector<bool> vis(nodes.size(), false);
 
     //BFS
 
-    queue<pair<int,int>> q;
-    q.push(make_pair(0, 0));
+    std::queue<std::pair<int,int>> q;
+    q.push(std::make_pair(0, 0));
 
     while(!q.empty())
     {
-        pair<int,int> c = q.front();
+        std::pair<int,int> c = q.front();
         q.pop();
 
         vis[c.first] = true;
@@ -356,7 +357,7 @@ void Scene_Menu::verticalD(std::vector<node>& nodes)
         {
             if(!vis[nodes[c.first].adjancents[i]])
             {
-                q.push(make_pair(nodes[c.first].adjancents[i], c.second+1));
+                q.push(std::make_pair(nodes[c.first].adjancents[i], c.second+1));
             }
         }
 
@@ -371,7 +372,7 @@ void Scene_Menu::verticalD(std::vector<node>& nodes)
 
         int x = 0;
 
-        list<int>::const_iterator it = levels[i].begin();
+        std::list<unsigned int>::const_iterator it = levels[i].begin();
         while(it != levels[i].end())
         {
             nodes[*it].position = sf::Vector2f(sep/2 + x*sep, y);
@@ -383,7 +384,7 @@ void Scene_Menu::verticalD(std::vector<node>& nodes)
     }
 }
 
-void Scene_Menu::physicD(std::vector<node>& nodes, float area)
+void Scene_Menu::physicD(GraphLayout& nodes, float area)
 {
     RandomGenerator randEngine;
 
@@ -403,22 +404,22 @@ void Scene_Menu::physicD(std::vector<node>& nodes, float area)
         {
             sf::Vector2f f = force(nodes, k, i);
             float modulus = lenght(f);
-            nodes[i].position = nodes[i].position + ((f / modulus) * min(modulus, t));
+            nodes[i].position = nodes[i].position + ((f / modulus) * std::min(modulus, t));
         }
-        t = max(t * 0.95f, 1.f);
+        t = std::max(t * 0.95f, 1.f);
     }
 }
 
-void Scene_Menu::roundD(std::vector<node>& nodes)
+void Scene_Menu::roundD(GraphLayout& nodes)
 {
-    vector<bool> vis(nodes.size(), false);
+    std::vector<bool> vis(nodes.size(), false);
     nodes[0].position = sf::Vector2f(400, 400);
     vis[0] = true;
 
     roundDrec(nodes, sf::Vector2f(400, 400), vis, 0, 2*PI, 1, 0);
 }
 
-void Scene_Menu::roundDrec(std::vector<node>& nodes, sf::Vector2f c, vector<bool>& v, float aI, float aF, int o, int n)
+void Scene_Menu::roundDrec(GraphLayout& nodes, sf::Vector2f c, std::vector<bool>& v, float aI, float aF, int o, int n)
 {
     float aN;
     if(o == 1) aN = (aF-aI)/(nodes[n].adjancents.size());
@@ -447,7 +448,7 @@ void Scene_Menu::roundDrec(std::vector<node>& nodes, sf::Vector2f c, vector<bool
     }
 }
 
-void Scene_Menu::roundcenteredD(std::vector<node>& nodes)
+void Scene_Menu::roundcenteredD(GraphLayout& nodes)
 {
     int max = 0;
     for(unsigned int i = 0; i < nodes.size(); ++i)
@@ -455,7 +456,7 @@ void Scene_Menu::roundcenteredD(std::vector<node>& nodes)
         if(nodes[i].adjancents.size() > nodes[max].adjancents.size()) max = i;
     }
 
-    vector<bool> vis(nodes.size(), false);
+    std::vector<bool> vis(nodes.size(), false);
     nodes[max].position = sf::Vector2f(400, 400);
     vis[max] = true;
 
