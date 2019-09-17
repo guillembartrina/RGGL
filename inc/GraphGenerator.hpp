@@ -15,136 +15,39 @@ typedef std::vector<std::vector<bool>> Graph_AM;
 
 typedef std::vector<unsigned int> PruferSequence;
 
-static RandomGenerator randGen;
-
-static void getRandomPruferSequence(unsigned int num, PruferSequence& seq)
+enum Model
 {
-	seq = PruferSequence(num-1);
+    GRAPH = 0,
+    TREE
+};
 
-	for(unsigned int i = 0; i < num-2; ++i)
-	{
-		seq[i] = randGen.getRandInt(0, num-1);
-	}
-
-	seq[num-2] = num-1;
-}
-
-static void generateRandomUndirectedTreeFromPruferSequence(unsigned int num, const PruferSequence& seq, Graph_AL& graph)
+enum Type
 {
-	std::priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int>> l;
-	std::vector<unsigned int> p(num, 0);
+    DIRECTED = 0,
+    UNDIRECTED
+};
 
-	for(unsigned int i = 0; i < num-1; ++i) p[seq[i]]++;
-
-	for(unsigned int i = 0; i < num; ++i)
-	{
-		if(p[i] == 0) l.push(i);
-	}
-
-	for(unsigned int i = 0; i < num-1; ++i)
-	{
-		unsigned int u = l.top();
-		l.pop();
-		unsigned int v = seq[i];
-		graph[v].insert(graph[v].end(), u);
-		graph[u].insert(graph[u].end(), v);
-
-		p[v]--;
-		if(p[v] == 0) l.push(v);
-	}
-}
-
-static void generateRandomUndirectedTreeFromPruferSequence(unsigned int num, const PruferSequence& seq, Graph_AM& graph)
+class GraphGenerator
 {
-	std::priority_queue<unsigned int, std::vector<unsigned int>, std::greater<unsigned int>> l;
-	std::vector<unsigned int> p(num, 0);
+public:
 
-	for(unsigned int i = 0; i < num-1; ++i) p[seq[i]]++;
+	GraphGenerator();
+	~GraphGenerator();
 
-	for(unsigned int i = 0; i < num; ++i)
-	{
-		if(p[i] == 0) l.push(i);
-	}
+	static void generate(Graph_AL& graph, Model model, Type type, int num, float density = 1.f);
+	static void generate(Graph_AM& graph, Model model, Type type, int num, float density = 1.f);
 
-	for(unsigned int i = 0; i < num-1; ++i)
-	{
-		unsigned int u = l.top();
-		l.pop();
-		unsigned int v = seq[i];
-		graph[v][u] = true;
-		graph[u][v] = true;
+private:
 
-		p[v]--;
-		if(p[v] == 0) l.push(v);
-	}
-}
+	static RandomGenerator randGen;
 
-static void generateRandomUndirectedTree(unsigned int num, Graph_AL& graph)
-{
-	graph = Graph_AL(num);
+	static void getRandomPruferSequence(PruferSequence& seq, unsigned int num);
 
-	PruferSequence seq;
-	
-	getRandomPruferSequence(num, seq);
-	generateRandomUndirectedTreeFromPruferSequence(num, seq, graph);
-}
+	static void buildUndirectedTreeFromPruferSequence(Graph_AL& graph, const PruferSequence& seq);
+	static void buildUndirectedTreeFromPruferSequence(Graph_AM& graph, const PruferSequence& seq);
 
-static void generateRandomUndirectedTree(unsigned int num, Graph_AM& graph)
-{
-	graph = Graph_AM(num, std::vector<bool>(num, false));
-
-	PruferSequence seq;
-	
-	getRandomPruferSequence(num, seq);
-	generateRandomUndirectedTreeFromPruferSequence(num, seq, graph);
-}
-
-static void generateRandomUndirectedGraphFromErdosRenyiModel2(unsigned int num, float prob, Graph_AL& graph)
-{
-	for(unsigned int i = 0; i < num; ++i)
-	{
-		for(unsigned int j = i+1; j < num; ++j)
-		{
-			float random = randGen.getRandFloat(0, 1);
-
-			if(random < prob)
-			{
-				graph[i].insert(graph[i].end(), j);
-				graph[j].insert(graph[j].end(), i);
-			} 
-		}
-	}
-}
-
-static void generateRandomUndirectedGraphFromErdosRenyiModel2(unsigned int num, float prob, Graph_AM& graph)
-{
-	for(unsigned int i = 0; i < num; ++i)
-	{
-		for(unsigned int j = i+1; j < num; ++j)
-		{
-			float random = randGen.getRandFloat(0, 1);
-
-			if(random < prob)
-			{
-				graph[i][j] = true;
-				graph[j][i] = true;
-			} 
-		}
-	}
-}
-
-static void generateRandomUndirectedGraph(unsigned int num, float prob, Graph_AL& graph)
-{
-	graph = Graph_AL(num);
-
-	generateRandomUndirectedGraphFromErdosRenyiModel2(num, prob, graph);
-}
-
-static void generateRandomUndirectedGraph(unsigned int num, float prob, Graph_AM& graph)
-{
-	graph = Graph_AM(num, std::vector<bool>(num, false));
-
-	generateRandomUndirectedGraphFromErdosRenyiModel2(num, prob, graph);
-}
+	static void generateRandomUndirectedGraphFromErdosRenyiModel2(Graph_AL& graph, unsigned int num, float density);
+	static void generateRandomUndirectedGraphFromErdosRenyiModel2(Graph_AM& graph, unsigned int num, float density);
+};
 
 #endif

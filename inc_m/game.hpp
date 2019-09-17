@@ -16,30 +16,35 @@ class Game : public sf::NonCopyable
 {
 public:
 
-  Game();
+  Game(int argc, char** argv);
   ~Game();
 
   void run();
 
 private:
 
-  static const unsigned int W;
-  static const unsigned int H;
+  static const bool fullscreen;
+
+  static const unsigned int screenW;
+  static const unsigned int screenH;
+  static const unsigned int style;
   static const std::string title;
 
-  sf::RenderWindow _window;
-  sf::Clock _clock;
+  sf::RenderWindow window;
+  sf::Clock clock;
 
-  SceneHandler _sceneHandler;
+  SceneHandler sceneHandler;
 
-  Resources _resources;
+  Resources resources;
+
+  Core core;
 
   void init();
   void loop();
 
+  void handleEvents();
   void update();
   void draw();
-  void handleEvents();
 };
 
 #endif

@@ -1,6 +1,8 @@
 
 #include "Scene.hpp"
 
-Scene::Scene(SceneHandler* sceneHandler, Resources* resources) : _sceneHandler(sceneHandler), _resources(resources) {}
+Scene::Scene(Core core)
+: core(core) 
+{}
 
 Scene::~Scene() {}

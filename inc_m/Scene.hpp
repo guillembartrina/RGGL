@@ -10,11 +10,21 @@
 
 class SceneHandler;
 
-class Scene
+struct Core
 {
+  int argc;
+  char** argv;
+	
+  sf::RenderWindow* window;
+  SceneHandler* sceneHandler;
+  Resources* resources;
+};
+
+class Scene
+{ 
 public:
 
-    Scene(SceneHandler* sceneHandler, Resources* resources);
+    Scene(Core core);
     virtual ~Scene();
 
     virtual void init() = 0;
@@ -31,8 +41,7 @@ public:
 
 protected:
 
-    SceneHandler* _sceneHandler;
-    Resources* _resources;
+    Core core;
 };
 
 #endif

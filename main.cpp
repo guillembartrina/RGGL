@@ -1,8 +1,8 @@
-#include "game.hpp"
+#include "Game.hpp"
 
-int main()
+int main(int argc, char** argv)
 {
-  Game game;
+  Game game(argc, argv);
   game.run();
 
   return 0;
