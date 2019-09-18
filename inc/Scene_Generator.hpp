@@ -43,8 +43,6 @@ private:
     int tmpDistribution;
 
     GraphLayout gl;
-
-    void distribute(Distribution mode);
 };
 
 #endif

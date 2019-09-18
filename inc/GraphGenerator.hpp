@@ -34,8 +34,8 @@ public:
 	GraphGenerator();
 	~GraphGenerator();
 
-	static void generate(Graph_AL& graph, Model model, Type type, int num, float density = 1.f);
-	static void generate(Graph_AM& graph, Model model, Type type, int num, float density = 1.f);
+	template <typename Graph_T>
+	static void generate(Graph_T& graph, Model model, Type type, unsigned int num, float density = 1.f);
 
 private:
 
@@ -49,5 +49,39 @@ private:
 	static void generateRandomUndirectedGraphFromErdosRenyiModel2(Graph_AL& graph, unsigned int num, float density);
 	static void generateRandomUndirectedGraphFromErdosRenyiModel2(Graph_AM& graph, unsigned int num, float density);
 };
+
+template <typename Graph_T>
+void GraphGenerator::generate(Graph_T& graph, Model model, Type type, unsigned int num, float density)
+{
+	static_assert(std::is_same<Graph_T, Graph_AL>::value or std::is_same<Graph_T, Graph_AM>::value, "Not a type able to hold graphs");
+
+    switch(type)
+    {
+        case DIRECTED:
+        {
+            //IMPLEMENT
+        }
+            break;
+        case UNDIRECTED:
+        {
+            switch(model)
+            {
+                case GRAPH:
+                {
+                    generateRandomUndirectedGraphFromErdosRenyiModel2(graph, num, density);
+                }
+                    break;
+                case TREE:
+                {
+                    PruferSequence seq;
+                    getRandomPruferSequence(seq, num);
+                    buildUndirectedTreeFromPruferSequence(graph, seq);
+                }
+                    break;   
+            };
+        }
+            break;   
+    };
+}
 
 #endif

@@ -1,6 +1,7 @@
 #include "game.hpp"
 
-#include "Scene_Menu.hpp"
+#include "Scene_Generator.hpp"
+#include "Scene_Open.hpp"
 
 const bool Game::fullscreen = false;
 
@@ -43,7 +44,30 @@ void Game::init()
 
   ImGui::SFML::Init(window);
 
-  sceneHandler.addScene(std::unique_ptr<Scene>(new Scene_Menu(core)));
+  switch(core.argc)
+  {
+    case 1:
+    {
+      sceneHandler.addScene(std::unique_ptr<Scene>(new Scene_Menu(core)));
+    }
+      break;
+    case 3:
+    {
+      Encoding e;
+
+      std::string str(core.argv[1]);
+
+      if(str == "al") e = Encoding::AL;
+      else if(str == "am") e = Encoding::AM;
+      else usage();
+
+      sceneHandler.addScene(std::unique_ptr<Scene>(new Scene_Open(core, e, std::string(core.argv[2]))));
+    }
+      break;
+    default:
+      usage();
+      break;
+  };
 
   sceneHandler.init();
 
@@ -107,4 +131,11 @@ void Game::draw()
   ImGui::SFML::Render(window);
 
   window.display();
+}
+
+void Game::usage()
+{
+  std::cerr << "Usage: game.exe [al/am file]" << std::endl;
+  window.close();
+  exit(0);
 }

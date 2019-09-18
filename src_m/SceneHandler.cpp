@@ -1,8 +1,6 @@
 
 #include "SceneHandler.hpp"
 
-#include "Scene_Menu.hpp"
-
 SceneHandler::SceneHandler()
 {
     _addRequest = false;

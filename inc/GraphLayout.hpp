@@ -39,7 +39,7 @@ public:
     void update(sf::Vector2i mouse);
     void draw(sf::RenderWindow& window) const;
 
-    const char** getDistributions() const;
+    const char** getDistributions() const; //return[0] = numDistributions, return[1...numDistributions] = distributions
 
 private:
 

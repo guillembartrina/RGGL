@@ -1,74 +1,13 @@
 
 #include "GraphGenerator.hpp"
 
+#include <typeinfo>
+
 RandomGenerator GraphGenerator::randGen;
 
 GraphGenerator::GraphGenerator() {}
 
 GraphGenerator::~GraphGenerator() {}
-
-void GraphGenerator::generate(Graph_AL& graph, Model model, Type type, int num, float density)
-{
-    switch(type)
-    {
-        case DIRECTED:
-        {
-            //IMPLEMENT
-        }
-            break;
-        case UNDIRECTED:
-        {
-            switch(model)
-            {
-                case GRAPH:
-                {
-                    generateRandomUndirectedGraphFromErdosRenyiModel2(graph, num, density);
-                }
-                    break;
-                case TREE:
-                {
-                    PruferSequence seq;
-                    getRandomPruferSequence(seq, num);
-                    buildUndirectedTreeFromPruferSequence(graph, seq);
-                }
-                    break;   
-            };
-        }
-            break;   
-    };
-}
-
-void GraphGenerator::generate(Graph_AM& graph, Model model, Type type, int num, float density)
-{
-    switch(type)
-    {
-        case DIRECTED:
-        {
-            //IMPLEMENT
-        }
-            break;
-        case UNDIRECTED:
-        {
-            switch(model)
-            {
-                case GRAPH:
-                {
-                    generateRandomUndirectedGraphFromErdosRenyiModel2(graph, num, density);
-                }
-                    break;
-                case TREE:
-                {
-                    PruferSequence seq;
-                    getRandomPruferSequence(seq, num);
-                    buildUndirectedTreeFromPruferSequence(graph, seq);
-                }
-                    break;   
-            };
-        }
-            break;   
-    };
-}
-
 
 void GraphGenerator::getRandomPruferSequence(PruferSequence& seq, unsigned int num)
 {

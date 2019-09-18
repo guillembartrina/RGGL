@@ -27,7 +27,7 @@ GL_FLAGS = -lopengl32 -lglu32
 
 
 #COMMANDS
-game.exe: $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(O_IMGUI)
+rggl.exe: $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(O_IMGUI)
 	g++ -o $(D_BIN)/$@ $(D_OBJ)/main.o $(F_OBJ_M) $(F_OBJ) $(O_IMGUI) $(IMGUI_FLAGS) $(SFML_FLAGS) $(GL_FLAGS)
 
 $(D_OBJ)/main.o: main.cpp

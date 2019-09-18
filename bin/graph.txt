@@ -1,0 +1,6 @@
+5
+f t t t t
+f f f f f
+f f f f f
+f f f f f
+f f f f f

@@ -1,5 +1,5 @@
 
-#include "Scene_Menu.hpp"
+#include "Scene_Generator.hpp"
 
 Scene_Menu::Scene_Menu(Core core)
 : Scene(core)
@@ -53,10 +53,6 @@ void Scene_Menu::update(const sf::Time deltatime)
     ImGui::Separator();
     ImGui::PushItemWidth(80.f);
     int size = reinterpret_cast<intptr_t>(gl.getDistributions()[0]);
-    //std::cerr << &gl.getDistributions()[0] << std::endl;
-    //std::cerr << gl.getDistributions()[1] << std::endl;
-    //std::cerr << &gl.getDistributions()[1] << std::endl;
-    //std::cerr << (gl.getDistributions()+sizeof(char*)) << std::endl;
     ImGui::Combo(" dist.", &tmpDistribution, &gl.getDistributions()[1], size);
     ImGui::Separator();
     if(ImGui::Button("GEN", ImVec2(125, 20)))
@@ -67,7 +63,7 @@ void Scene_Menu::update(const sf::Time deltatime)
         if(numNodes > 0)
         {
             Graph_AL graph;
-            GraphGenerator::generate(graph, model, Type::UNDIRECTED, numNodes, density);
+            GraphGenerator::generate<Graph_AL>(graph, model, Type::UNDIRECTED, numNodes, density);
             gl.load(graph, distribution);
         }
     }
