@@ -1,6 +1,6 @@
 
-#ifndef GRAPHG_HPP
-#define GRAPHG_HPP
+#ifndef GRAPHGENERATOR_HPP
+#define GRAPHGENERATOR_HPP
 
 #include <iostream>
 #include <vector>

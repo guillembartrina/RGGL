@@ -1,6 +1,8 @@
 
 #include "Scene_Generator.hpp"
 
+#include "GraphIO.hpp"
+
 Scene_Menu::Scene_Menu(Core core)
 : Scene(core)
 , gl(core.resources->Font("font"))
@@ -10,6 +12,8 @@ Scene_Menu::~Scene_Menu() {}
 
 void Scene_Menu::init()
 {
+    generated = false;
+
     model = Model::GRAPH;
     tmpModel = 0;
     numNodes = 0;
@@ -28,7 +32,7 @@ void Scene_Menu::handleEvents(const sf::Event& event)
 
 void Scene_Menu::update(const sf::Time deltatime)
 {
-    ImGui::SetNextWindowSize(ImVec2(140, 180));
+    ImGui::SetNextWindowSize(ImVec2(140, 190));
     ImGui::SetNextWindowPos(ImVec2(core.window->getSize().x - 145, 5));
     ImGui::Begin("MENU", NULL, ImGuiWindowFlags_NoResize);
     ImGui::RadioButton("graph", &tmpModel, 0);
@@ -55,17 +59,24 @@ void Scene_Menu::update(const sf::Time deltatime)
     int size = reinterpret_cast<intptr_t>(gl.getDistributions()[0]);
     ImGui::Combo(" dist.", &tmpDistribution, &gl.getDistributions()[1], size);
     ImGui::Separator();
-    if(ImGui::Button("GEN", ImVec2(125, 20)))
+    if(ImGui::Button("GENERATE", ImVec2(125, 20)))
     {
         model = Model(tmpModel);
         distribution = Distribution(tmpDistribution);
 
         if(numNodes > 0)
         {
-            Graph_AL graph;
-            GraphGenerator::generate<Graph_AL>(graph, model, Type::UNDIRECTED, numNodes, density);
-            gl.load(graph, distribution);
+            graph = new Graph_AL();
+            GraphGenerator::generate<Graph_AL>(*graph, model, Type::UNDIRECTED, numNodes, density);
+            gl.load(*graph, distribution);
+
+            generated = true;
         }
+    }
+    ImGui::Separator();
+    if(ImGui::Button("SAVE", ImVec2(125, 20)))
+    {
+        if(generated) writeFile<Graph_AL>(*graph, "output.txt");
     }
     ImGui::End();
 

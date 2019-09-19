@@ -1,5 +1,5 @@
-#ifndef RANDOM_GENERATOR_HPP
-#define RANDOM_GENERATOR_HPP
+#ifndef RANDOMGENERATOR_HPP
+#define RANDOMGENERATOR_HPP
 
 #include <random>
 #include <ctime>

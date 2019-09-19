@@ -41,9 +41,6 @@ private:
 
     GraphLayout gl;
 
-    static void readFile_AL(const std::string& file, Graph_AL& graph);
-    static void readFile_AM(const std::string& file, Graph_AM& graph);
-
 };  
 
 #endif

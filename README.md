@@ -53,7 +53,8 @@ The input file can be encoded in two ways:
 >x x x ... (end with -1)  
 >x x x ... (end with -1)  
 >...  
->(numnode times)
+>(numnode times)  
+
 Where x is the number of the adjacent node
 
 Example:
@@ -71,6 +72,7 @@ Example:
 >x x x x x ... (numnodes times)  
 >...  
 >(numnode times)  
+
 Where x can be: 't' for true or 'f' for false
 
 Example:
@@ -85,14 +87,16 @@ f t f f f
 
 ## Guide
 
-In GENERATOR mode you have a menu at the top right where you have multiple options of graph generation
+In GENERATOR mode you have a menu at the top right where you can find multiple options for graph generation and to save the graph into a file
+
+By default the graph is saved in a file called 'output.txt'
 
 ### Interactivism
 
-In both modes you can inspectionate the graph:
+In both modes you can inspect the graph:
 
->Left click + Drag -> move arround  
->Right click on a node + Drag -> move node arround  
->Mouse scroll -> zoom  
->Left shift + mouse scroll -> node size zoom  
+>(Left click + Drag) -> move arround  
+>(Right click on a node + Drag) -> move node arround  
+>(Mouse scroll) -> zoom  
+>(Left shift + mouse scroll) -> node size zoom  
 

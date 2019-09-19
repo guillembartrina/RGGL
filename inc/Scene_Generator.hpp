@@ -35,6 +35,8 @@ public:
 
 private:
 
+    bool generated;
+
     Model model;
     int tmpModel;
     int numNodes;
@@ -43,6 +45,8 @@ private:
     int tmpDistribution;
 
     GraphLayout gl;
+
+    Graph_AL* graph;
 };
 
 #endif
