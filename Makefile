@@ -17,7 +17,7 @@ D_SFML_INC = sfml/include
 SFML_FLAGS = -Lsfml/lib -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 
 D_IMGUI_INC = imgui/include
-IMGUI_FLAGS = -Limgui/lib -limgui
+IMGUI_FLAGS = -Limgui/lib -llibimgui
 
 D_IMGUI = imgui
 F_IMGUI = $(wildcard $(D_IMGUI)/*.cpp)
