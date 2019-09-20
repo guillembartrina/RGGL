@@ -6,15 +6,13 @@ This tool has two basic features:
 
 ## Getting Started
 
-This project is ready-to-build for windows x64 systems, using g++ and make (mingw64).
+This project is ready-to-build for windows x64 and linux x64 systems, using make.
 For any other system you need to rebuild prerequisite libraries and put them in the correct folder.
 
 ### Prerequisites
 
 SFML (https://github.com/SFML/SFML) -> build shared libs, then put object libs into 'sfml/lib/' and shared libs into 'bin/'  
 ImGui (https://github.com/ocornut/imgui) -> build shared libs manually, then put object libs into 'imgui/lib/' and shared libs into 'bin/'  
-
-(If necessary put 'libgcc' and 'libstdc++' into 'bin/' folder too)  
 
 ### Building
 
@@ -31,6 +29,11 @@ make clean
 ```
 
 ## Usage
+
+If you are using linux you have to add the exe folder to LD PATH:
+```
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
+```
 
 In order to open the program in GENERATOR mode you only have to execute it:
 ```
