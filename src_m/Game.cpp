@@ -1,4 +1,4 @@
-#include "game.hpp"
+#include "Game.hpp"
 
 #include "Scene_Generator.hpp"
 #include "Scene_Open.hpp"
