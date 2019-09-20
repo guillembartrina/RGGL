@@ -17,13 +17,17 @@ D_SFML_INC = sfml/include
 SFML_FLAGS = -Lsfml/lib -lsfml-system -lsfml-window -lsfml-graphics -lsfml-audio
 
 D_IMGUI_INC = imgui/include
-IMGUI_FLAGS = -Limgui/lib -llibimgui
+IMGUI_FLAGS = -Limgui/lib -limgui
 
 D_IMGUI = imgui
 F_IMGUI = $(wildcard $(D_IMGUI)/*.cpp)
 O_IMGUI = $(patsubst $(D_IMGUI)/%.cpp,$(D_OBJ)/%.o,$(F_IMGUI))
 
-GL_FLAGS = -lopengl32 -lglu32
+ifeq ($(OS),Windows_NT)
+	GL_FLAGS = -lopengl32 -lglu32
+else
+	GL_FLAGS = -lGL
+endif
 
 
 #COMMANDS
